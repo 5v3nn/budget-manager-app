@@ -5,11 +5,11 @@ import loghandler
 class DataManagement:
 
     # db variables
-    path_db = "data.db"
+    path_db = "./data.db"
     category_table_name = "category"
     entry_table_name = "entry"
 
-    PATH_LOGFILE = "./data_management.log"
+    PATH_LOGFILE = "./logs/data_management.log"
 
     def __init__(self):
         # create table

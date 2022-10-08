@@ -13,7 +13,7 @@ from save_system import SaveSystem
 KIVY_FILE_SCREEN_MANAGER = './templates/screen_manager.kv'
 
 # set version
-__version__ = "0.1.0"  # change in the buildozer.spec too
+__version__ = "0.1"  # change in the buildozer.spec too
 
 # Set screen size (didn't work)
 Config.set('graphics', 'resizable', '1')

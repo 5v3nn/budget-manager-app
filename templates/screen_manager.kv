@@ -1,0 +1,30 @@
+#: import MDScreenManager kivymd.uix.screenmanager
+#: include ./templates/splash_screen.kv
+#: include ./templates/entry_view.kv
+#: include ./templates/entry_add_view.kv
+#: include ./templates/settings_view.kv
+#: include ./templates/db_settings_view.kv
+
+
+MDScreenManager:
+    id: screen_manager
+
+    SplashScreen:  # dummy screen to give entry view a chance to load
+        id: splash_screen
+        manager: screen_manager
+
+    EntryView:
+        id: entry_view
+        manager: screen_manager
+
+    EntryAddView:
+        id: entry_add_view
+        manager: screen_manager
+
+    DBSettingsView:
+        id: db_settings_view
+        manager: screen_manager
+
+    SettingsView:
+        id: settings_view
+        manager: screen_manager

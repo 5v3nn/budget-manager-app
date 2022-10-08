@@ -1,0 +1,9 @@
+./logs/
+./kivy_kitchen/
+./bashrc
+./buildozer.spec
+./data.db
+./data_management.log
+./__pycache__/
+./venv/
+./.idea/

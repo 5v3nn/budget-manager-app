@@ -1,0 +1,169 @@
+
+#: import EntryView screens.entry_add_view
+
+
+<EntryField@MDBoxLayout>:
+    orientation: 'horizontal'
+    adaptive_height: True
+    padding: [20, 0, 20, 0]
+    spacing: 30
+
+
+<EntryFieldLabel@MDLabel>:
+    markup: True
+    font_size: '18px'
+    valign: 'center'
+    halign: 'left'
+    size_hint: (.3, 1)
+
+
+<EntryAddView>:
+    id: 'entry_add_view'
+    name: 'entry_add_view'
+
+    # variables
+    default_entry_type_button_id: 'default_type_button'
+    item_input_id: 'item_input'
+    select_category_caller_id: 'dropdown_select_category_button'
+    date_picker_id: 'date_button'
+    earning_or_cost_field_id: ['earning_or_cost_field_label', 'money_value_input']
+    earning_or_cost_field_label_text_value: ['Earning:', 'Cost:']
+
+    on_pre_enter:
+        # create menu dropdown to select the category
+        root.create_menu_select_category()
+        # set default earning_or_cost_field_label text
+        root.set_earning_or_cost_fields()
+
+    on_pre_leave:
+        root.manager.transition.direction = 'right'
+
+    on_leave:
+        # reset entry field values
+        root.reset_entry_fields()
+        root.set_earning_or_cost_fields()
+
+
+    MDAnchorLayout:
+        anchor_y: 'top'
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            adaptive_height: True
+            padding: [10, 50, 10, 10]
+            spacing: 30
+
+            MDLabel:
+                text: '[b]Add Entry:[/b]'
+                markup: True
+                font_size: '24px'
+                valign: 'top'
+                halign: 'center'
+
+            MDLabel:
+                text: 'Add an entry by submitting the following data.'
+                markup: True
+                font_size: '12px'
+                valign: 'center'
+                halign: 'center'
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Type:'
+
+                MyToggleButton:
+                    id: default_type_button  # assign at the top
+                    text: 'Income'
+                    group: 'add_entry'
+                    size_hint: (.35, 1)
+                    state: 'down'
+                    on_release:
+                        root.add_entry_type = 0
+                        root.set_earning_or_cost_fields()
+
+                MyToggleButton:
+                    text: 'Expense'
+                    group: 'add_entry'
+                    size_hint: (.35, 1)
+                    on_release:
+                        root.add_entry_type = 1
+                        root.set_earning_or_cost_fields()
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Item:'
+
+                TextInputMaxLength:
+                    id: item_input  # assign at the top
+                    text: ''
+                    max_length: 20
+                    multiline: False
+                    mode: "rectangle"
+                    size_hint_x: .7
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Category:'
+
+                MDRectangleFlatButton:
+                    id: dropdown_select_category_button  # assign at the top
+                    text: root.get_default_category()
+                    current_item: root.get_default_category()
+                    on_release: root.menu_select_category.open()
+                    size_hint: (.7, 1)
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Date:'
+
+                MDRectangleFlatButton:
+                    id: date_button  # assign at the top
+                    text: root.get_default_date()
+                    size_hint: (.7, 1)
+                    on_release:
+                        root.date_picker_show()
+
+            EntryField:
+                EntryFieldLabel:
+                    id: earning_or_cost_field_label  # assign at the top
+                    text: 'Money Value:'
+
+                MoneyValueInput:
+                    id: money_value_input  # assign at the top
+                    text: ''
+                    is_negative: False
+                    multiline: False
+                    mode: "rectangle"
+                    input_filter: 'float'
+                    input_type: 'tel'
+                    size_hint_x: .7
+
+    MDAnchorLayout:
+        anchor_y: 'bottom'
+        padding: [10, 10, 10, 50]
+
+        EntryField:
+            MDRectangleFlatButton:
+                text: '[b]Cancel[/b]'
+                markup: True
+                font_size: '20px'
+                size_hint_x: .5
+                on_release:
+                    root.manager.current = 'entry_view'
+
+            MDRectangleFlatButton:
+                text: '[b]Add[/b]'
+                markup: True
+                font_size: '20px'
+                size_hint_x: .5
+                on_release:
+                    print('add')
+                    root.add_entry()
+                    root.manager.current = 'entry_view'
+
+
+
+
+
+
+

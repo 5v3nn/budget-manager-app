@@ -1,0 +1,89 @@
+
+#: import DBSettingsView screens.db_settings
+#: import TextInputMaxLength screens.entry_add_view
+
+
+<CreateCategoryDialog>:
+    orientation: 'horizontal'
+    spacing: 10
+    size_hint_y: None
+    height: '100dp'
+
+    EntryField:
+        padding: [0, 0, 0, 0]
+
+        EntryFieldLabel:
+            text: 'Name:'
+            size_hint: (.3, 1)
+
+        TextInputMaxLength:
+            id: create_category_button
+            text: ''
+            max_length: 20
+            multiline: False
+            mode: "rectangle"
+            size_hint_x: .7
+
+
+<DeleteCategoryDialogItem>:
+    on_release: root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+        #group: "check"  # add group if only one to delete
+
+
+<DBSettingsView>:
+
+    id: 'dbsettings_view'
+    name: 'dbsettings_view'
+
+    MDAnchorLayout:
+        anchor_y: 'top'
+        padding: [20, 20, 20, 20]
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+            adaptive_height: True
+
+            EntryField:
+                padding: [0, 10, 0, 10]
+
+                MDIconButton:
+                    icon: 'arrow-left-thick'
+                    icon_size: '32sp'
+                    #size_hint: (.2, 1)
+                    on_release:
+                        root.on_back_button()
+
+                MDLabel:
+                    text: '[b]Manage Categories[/b]'
+                    font_size: '24px'
+                    valign: 'center'
+                    halign: 'left'
+                    size_hint: (.5, 1)
+                    markup: True
+
+            HSeparator:
+                width: dp(2)
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'New Category:'
+                    size_hint: (.4, 1)
+
+                MDRectangleFlatButton:
+                    text: 'Create'
+                    size_hint: (.6, 1)
+                    on_release: root.on_create_category_button(app.theme_cls)
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Delete Category:'
+                    size_hint: (.4, 1)
+
+                MDRectangleFlatButton:
+                    text: 'Select Category'
+                    size_hint: (.6, 1)
+                    on_release: root.on_delete_category_button(app.theme_cls)

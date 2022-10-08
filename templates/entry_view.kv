@@ -1,0 +1,69 @@
+
+#: import EntryView screens.entry_view
+
+
+<EntryView>:
+    id: 'entry_view'
+    name: 'entry_view'
+
+    # assign the id of the widget where to add the data table
+    parent_id: 'parent_layout'
+
+    # assign the default month to display
+    default_display_month: root.get_default_display_month()
+
+    on_pre_enter:
+        # create menu dropdown to select the month to display
+        root.create_menu_select_display_month()
+
+    on_enter:
+        # load screen with data table already loaded
+        root.show_data_table(root.default_display_month)
+
+    MDAnchorLayout:
+        anchor_y: 'center'
+        padding: [10, 10, 10, 10]
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            anchor_y: 'top'
+            padding: [10, 10, 10, 10]
+            spacing: 10
+
+            MDBoxLayout:
+                orientation: 'horizontal'
+                adaptive_height: True
+                padding: [10, 10, 10, 10]
+                spacing: 10
+
+                MDLabel:
+                    text: '[b]Select Month:[/b]'
+                    font_size: '24px'
+                    valign: 'center'
+                    size_hint: (.5, 1)
+                    markup: True
+
+                MDRectangleFlatButton:
+                    id: dropdown_select_month_button
+                    text: root.default_display_month
+                    size_hint: (.5, 1)
+                    on_release:
+                        root.menu_select_display_month.open()
+                        #root.show_data_table(root.default_display_month)
+
+            # add data table in this widget
+            MDAnchorLayout:
+                id: parent_layout
+
+    MDBottomAppBar:
+        MDTopAppBar:
+            title: 'Budget Manager'
+            icon: 'plus'
+            type_button: 'standard'
+            type: 'bottom'
+            mode: 'end'
+            icon_color: app.theme_cls.accent_color
+            on_action_button:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'entry_add_view'
+            left_action_items: [["menu", lambda x: root.open_settings_view()],["database-settings", lambda x: root.open_dbsettings_view()]]

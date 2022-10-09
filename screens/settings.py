@@ -59,7 +59,7 @@ class SettingsView(MDScreen):
         if active_value:
             theme_cls.theme_style = "Dark"
             theme_cls.primary_palette = "BlueGray"
-            theme_cls.accent_palette = "BlueGray"
+            theme_cls.accent_palette = "Gray"
         else:
             theme_cls.theme_style = "Light"
             theme_cls.primary_palette = "Blue"

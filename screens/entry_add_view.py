@@ -9,7 +9,7 @@ from kivy.properties import BooleanProperty, NumericProperty, StringProperty, Li
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.button import MDFlatButton, MDRectangleFlatButton
+from kivymd.uix.button import MDFlatButton
 from kivymd.uix.behaviors.toggle_behavior import MDToggleButton
 from kivymd.uix.textfield import MDTextField
 
@@ -23,6 +23,7 @@ import loghandler
 
 # path to log file from main.pys view
 LOG_FILE_ENTRY_VIEW = "./logs/entry_add_view.log"
+
 
 class EntryAddView(MDScreen):
     """Screen for adding a new entry"""
@@ -160,8 +161,8 @@ class EntryAddView(MDScreen):
     # endregion
 
     def set_earning_or_cost_fields(self):
+        """ Set the related variables according to the type of the entry """
 
-        print(self.add_entry_type)
         # case 0: add income:
         if self.add_entry_type == 0:
             self.ids[self.earning_or_cost_field_id[0]].text = self.earning_or_cost_field_label_text_value[self.add_entry_type]
@@ -183,12 +184,21 @@ class EntryAddView(MDScreen):
         :return:
         """
 
-        data_management.DataManagement().add_element(
-            self.ids[self.select_category_caller_id].text,
-            self.ids[self.item_input_id].text,
-            self.ids[self.earning_or_cost_field_id[1]].text,
-            self.ids[self.date_picker_id].text
-        )
+        try:
+            data_management.DataManagement().add_element(
+                self.ids[self.select_category_caller_id].text,
+                self.ids[self.item_input_id].text,
+                self.ids[self.earning_or_cost_field_id[1]].text,
+                self.ids[self.date_picker_id].text
+            )
+        except Exception as add_err:
+            errmsg = f"ADD ENTRY ERROR: {str(add_err)}"
+            loghandler.write_log(LOG_FILE_ENTRY_VIEW,
+                                 f"Could not add entry to database. Check database log. Error message: {str(errmsg)}")
+            print(errmsg)
+            return
+
+        loghandler.write_log(LOG_FILE_ENTRY_VIEW, f"Added entry to database. ")
 
     def reset_entry_fields(self):
         """

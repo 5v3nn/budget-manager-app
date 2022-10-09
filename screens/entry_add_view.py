@@ -106,6 +106,8 @@ class EntryAddView(MDScreen):
     def date_picker_show(self):
         """Open date picker."""
 
+        # todo create date picker on on_entry for performance
+
         # create date picker dialog
         date_dialog = MDDatePicker()
         # bind functions to it

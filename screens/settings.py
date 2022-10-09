@@ -5,15 +5,30 @@ This script handles the general settings of the application
 from kivy.uix.screenmanager import SlideTransition
 from kivymd.uix.screen import MDScreen
 from save_system import SaveSystem
-
+import loghandler
 
 
 class SettingsView(MDScreen):
 
-    @staticmethod
-    def get_dark_theme_value():
+    LOG_FILE = './logs/settings_view.log'
+
+
+    def get_dark_theme_value(self):
         # apply dark theme settings
-        return SaveSystem.load_variable(SaveSystem().SAVE_FILE_SETTINGS, 'dark_mode')
+
+        try:
+            dark = SaveSystem.load_variable(SaveSystem().SAVE_FILE_SETTINGS, 'dark_mode')
+
+            if dark and dark is not None:
+                return dark
+            else:
+                raise Exception(f'Value error for dark mode = {dark}')
+
+        except Exception as dark_mode_err:
+            errmsg = f"GET DARK MODE VALUE ERROR: {str(dark_mode_err)}"
+            loghandler.write_log(self.LOG_FILE, errmsg)
+            print(errmsg)
+            return False
 
     def on_back_button(self):
         """

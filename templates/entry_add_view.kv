@@ -32,7 +32,10 @@
     on_pre_enter:
         # create menu dropdown to select the category
         root.create_menu_select_category()
+        # create date picker
+        root.date_picker_create()
         # set default earning_or_cost_field_label text
+        root.add_entry_type = root.default_entry_type
         root.set_earning_or_cost_fields()
 
     on_pre_leave:
@@ -72,11 +75,9 @@
                     text: 'Type:'
 
                 MyToggleButton:
-                    id: default_type_button  # assign at the top
                     text: 'Income'
                     group: 'add_entry'
                     size_hint: (.35, 1)
-                    state: 'down'
                     on_release:
                         root.add_entry_type = 0
                         root.set_earning_or_cost_fields()
@@ -84,6 +85,8 @@
                 MyToggleButton:
                     text: 'Expense'
                     group: 'add_entry'
+                    id: default_type_button  # assign at the top
+                    state: 'down'
                     size_hint: (.35, 1)
                     on_release:
                         root.add_entry_type = 1

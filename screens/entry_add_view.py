@@ -29,7 +29,8 @@ class EntryAddView(MDScreen):
 
     # type
     default_entry_type_button_id = StringProperty()
-    add_entry_type = NumericProperty(default=0)  # 0: Income, 1: Expense
+    default_entry_type = 1  # 0: Income, 1: Expense
+    add_entry_type = NumericProperty()  # get assigned in the kivy file
 
     # item
     item_input_id = StringProperty()
@@ -39,6 +40,7 @@ class EntryAddView(MDScreen):
     menu_select_category = None
 
     # date picker
+    date_dialog = None
     date_picker_id = StringProperty()
 
     # earning or cost field label
@@ -103,18 +105,22 @@ class EntryAddView(MDScreen):
         return str(data_management.DataManagement().get_categories()[0])
 
     # region date_picker
+    def date_picker_create(self):
+        """ Create date picker"""
+
+        # create date picker dialog
+        self.date_dialog = MDDatePicker()
+        # bind functions to it
+        self.date_dialog.bind(on_save=self.date_picker_on_save, on_cancel=self.date_picker_on_cancel)
+
     def date_picker_show(self):
         """Open date picker."""
 
-        # todo create date picker on on_entry for performance
-
-        # create date picker dialog
-        date_dialog = MDDatePicker()
-        # bind functions to it
-        date_dialog.bind(on_save=self.date_picker_on_save, on_cancel=self.date_picker_on_cancel)
+        if self.date_dialog is None:
+            self.date_picker_create()
 
         # open date picker dialog
-        date_dialog.open()
+        self.date_dialog.open()
 
     def date_picker_on_save(self, instance, value, date_range):
         """
@@ -129,6 +135,7 @@ class EntryAddView(MDScreen):
 
         # set button text to date:
         self.ids[self.date_picker_id].text = str(value)
+        self.date_dialog.dismiss()
 
     def date_picker_on_cancel(self, instance, value):
         """
@@ -138,7 +145,7 @@ class EntryAddView(MDScreen):
         # We don't really want to overwrite the potentially selected date with the default date.
         # set date picker button back to default:
         # self.ids[self.date_picker_id].text = self.get_default_date()
-        pass
+        self.date_dialog.dismiss()
 
     @staticmethod
     def get_default_date() -> str:
@@ -153,6 +160,8 @@ class EntryAddView(MDScreen):
     # endregion
 
     def set_earning_or_cost_fields(self):
+
+        print(self.add_entry_type)
         # case 0: add income:
         if self.add_entry_type == 0:
             self.ids[self.earning_or_cost_field_id[0]].text = self.earning_or_cost_field_label_text_value[self.add_entry_type]
@@ -188,11 +197,12 @@ class EntryAddView(MDScreen):
         :return:
         """
 
-        self.add_entry_type = 0
+        self.add_entry_type = self.default_entry_type
         self.ids[self.default_entry_type_button_id].state = 'down'
         self.ids[self.item_input_id].text = ''
         self.ids[self.select_category_caller_id].text = self.get_default_category()
         self.ids[self.date_picker_id].text = self.get_default_date()
+        self.date_dialog = None
         self.ids[self.earning_or_cost_field_id[1]].text = ''  # money value
 
 

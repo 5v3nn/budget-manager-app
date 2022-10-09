@@ -84,7 +84,7 @@ class DBSettingsView(MDScreen):
         Snackbar(text=f'Created new category: "{category_name}".',
                  snackbar_x='20dp',
                  snackbar_y='20dp',
-                 size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                 size_hint_x=(Window.width - (dp(20) * 2)) / Window.width,
                  duration=3,
                  ).open()
 
@@ -206,7 +206,7 @@ class DBSettingsView(MDScreen):
         Snackbar(text=alert_text,
                  snackbar_x='20dp',
                  snackbar_y='20dp',
-                 size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                 size_hint_x=(Window.width - (dp(20) * 2)) / Window.width,
                  duration=3,
                  ).open()
         # close dialog

@@ -2,7 +2,7 @@
 This script handles the screen where entries are added.
 
 """
-
+from kivy.core.window import Window
 # import kivy modules
 from kivy.metrics import dp
 from kivy.properties import BooleanProperty, NumericProperty, StringProperty, ListProperty
@@ -11,6 +11,7 @@ from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.behaviors.toggle_behavior import MDToggleButton
+from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.textfield import MDTextField
 
 # import modules
@@ -199,6 +200,15 @@ class EntryAddView(MDScreen):
             return
 
         loghandler.write_log(LOG_FILE_ENTRY_VIEW, f"Added entry to database. ")
+
+        # Snackbar feedback that entry was added
+        # create a quick snackbar as feedback that category was created
+        Snackbar(text=f'Added new entry.',
+                 snackbar_x='20dp',
+                 snackbar_y='20dp',
+                 size_hint_x=(Window.width - (dp(20) * 2)) / Window.width,
+                 duration=1.5,
+                 ).open()
 
     def reset_entry_fields(self):
         """

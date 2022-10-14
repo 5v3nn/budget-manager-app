@@ -19,27 +19,23 @@ __version__ = "0.1.0.1"  # change in the buildozer.spec too
 # Config.set('graphics', 'resizable', 1)
 # Config.set('graphics', 'width', 1080)
 # Config.set('graphics', 'height', 2160)
-# Window.size = (1080 * .4, 2160 * .4)
+Window.size = (1080 * .4, 2160 * .4)  # todo comment this out for build
 
 
 class BudgetManagerApp(MDApp):
-    title = 'Budget Manager Application'
 
+    title = 'Budget Manager Application'
 
     def build(self):
 
         # load dark mode settings and apply
         dark_mode = SaveSystem().load_variable(SaveSystem().SAVE_FILE_SETTINGS, 'dark_mode')
-        dark_mode = dark_mode if dark_mode is not None else True
+        dark_mode = dark_mode if dark_mode is not None else True  # dart mode default
         settings.SettingsView().on_dark_theme_switch(dark_mode, self.theme_cls)
-        # self.theme_cls.theme_style_switch_animation = True
-        # self.theme_cls.theme_style = "Dark"
-        # self.theme_cls.primary_palette = "BlueGray"
-        # self.theme_cls.accent_palette = "Gray"
 
+        # load kivy file(s)
         manager = Builder.load_file(KIVY_FILE_SCREEN_MANAGER)
         return manager
-
 
 
 if __name__ == '__main__':

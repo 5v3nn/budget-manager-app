@@ -5,7 +5,7 @@ import loghandler
 class DataManagement:
 
     # db variables
-    path_db = "./data.db"
+    path_db = "./assets/data.db"
     category_table_name = "category"
     entry_table_name = "entry"
 

@@ -8,3 +8,4 @@
 ./.idea/
 ./bin/
 ./.buildozer/
+./screens/__pycache__/

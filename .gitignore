@@ -9,3 +9,4 @@
 ./bin/
 ./.buildozer/
 ./screens/__pycache__/
+./testing.py

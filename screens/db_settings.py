@@ -1,5 +1,6 @@
 from kivy.core.window import Window
 from kivy.metrics import dp
+from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import SlideTransition
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
@@ -10,10 +11,16 @@ from kivymd.uix.snackbar import Snackbar
 # from screens.entry_add_view import TextInputMaxLength
 from save_system import SaveSystem
 from data_management import DataManagement
+from kivymd.app import MDApp
 
 
 class DBSettingsView(MDScreen):
     """ Settings screen"""
+
+    app = None
+
+    # theme class
+    theme_class = None
 
     # category management
     category_create_dialog = None
@@ -21,47 +28,78 @@ class DBSettingsView(MDScreen):
     category_delete_dialog_alert = None
 
 
-    def on_back_button(self):
-        """
-        Go back to the default screen
+    def __init__(self, **kwargs):
+        super(DBSettingsView, self).__init__(**kwargs)
 
-        :return:
-        """
+        # get running app
+        self.app = MDApp.get_running_app()
 
-        # transition options
-        self.manager.transition = SlideTransition()
-        self.manager.transition.direction = 'right'
-        self.manager.current = 'entry_view'
+        # get theme class
+        self.theme_class = self.app.theme_cls
+
+        # init dialogs
+        self.init_category_management_dialogs()
+
 
     # region category_management
+    def init_category_management_dialogs(self):
+        """ Init dialogs for the category management beforehand.  """
+
+        # create category dialog
+        self.category_create_dialog = MDDialog(
+            title="Create New Category:",
+            type="custom",
+            auto_dismiss=False,
+            content_cls=CreateCategoryDialog(),
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_create_dialog_on_close()
+                ),
+                MDFlatButton(
+                    text="Create",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_create_dialog_on_create()
+                ),
+            ],
+        )
+
+        # delete category dialog
+        self.category_delete_dialog = MDDialog(
+            title="Select Category to Delete:",
+            type="confirmation",
+            auto_dismiss=False,
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_delete_dialog_on_close()
+                ),
+                MDFlatButton(
+                    text="Delete",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_delete_dialog_on_delete(self.theme_class)
+                ),
+            ],
+            items=[],
+        )
+
     def on_create_category_button(self, theme_cls):
-        """
-        Show Dialog for creating a new category, which will be added to the database.
+        """Show Dialog for creating a new category, which will be added to the database.
+
+        :param theme_cls: theme class
         :return:
         """
 
         if not self.category_create_dialog:
-            self.category_create_dialog = MDDialog(
-                title="Create New Category:",
-                type="custom",
-                auto_dismiss=False,
-                content_cls=CreateCategoryDialog(),
-                buttons=[
-                    MDFlatButton(
-                        text="Cancel",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_create_dialog_on_close()
-                    ),
-                    MDFlatButton(
-                        text="Create",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_create_dialog_on_create()
-                    ),
-                ],
-            )
-            self.category_create_dialog.open()
+            self.init_category_management_dialogs()
+
+        self.category_create_dialog.open()
 
     def category_create_dialog_on_close(self):
         """ Close and reset category create dialog"""
@@ -91,38 +129,23 @@ class DBSettingsView(MDScreen):
         # close dialog
         self.category_create_dialog_on_close()
 
-    def on_delete_category_button(self, theme_cls):
-        """
-        Show Dialog for deleting a category, which will be submitted to the database.
+    def on_delete_category_button(self):
+        """Show Dialog for deleting a category, which will be submitted to the database.
+
         :return:
         """
 
+        #todo remove arguments
+
         if not self.category_delete_dialog:
-            self.category_delete_dialog = MDDialog(
-                title="Select Category to Delete:",
-                type="confirmation",
-                auto_dismiss=False,
-                # content_cls=DeleteCategoryDialogItem,
-                buttons=[
-                    MDFlatButton(
-                        text="Cancel",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_delete_dialog_on_close()
-                    ),
-                    MDFlatButton(
-                        text="Delete",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_delete_dialog_on_delete(theme_cls)
-                    ),
-                ],
-                items=[
-                    DeleteCategoryDialogItem(text=f"{category_name}") for category_name in
-                    DataManagement().get_categories()
-                ],
-            )
-            self.category_delete_dialog.open()
+            self.init_category_management_dialogs()
+
+        # set dialog items
+        self.category_delete_dialog.update_items([
+            DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
+        ])
+
+        self.category_delete_dialog.open()
 
     def category_delete_dialog_on_close(self):
         """ Close and reset category delete dialog"""
@@ -154,11 +177,12 @@ class DBSettingsView(MDScreen):
         if len(items_to_delete) > 1:
             alert_title, alert_text = "Delete Categories?", f"Delete categories: "
             for i in range(len(items_to_delete)):
-                alert_text += f"'{items_to_delete[i]}'" + ", "  #  + (", " if i <= len(items_to_delete)-2 else "")
+                alert_text += f"'{items_to_delete[i]}'" + ", "
             alert_text += f"\nand {nr_of_entries_to_delete} related entries?"
 
         # alert box for confirmation to delete category and related entries
         if not self.category_delete_dialog_alert:
+            # its okay to create dialog here, since this one doesn't cost too much.
             self.category_delete_dialog_alert = MDDialog(
                 title=alert_title,
                 text=alert_text,
@@ -177,7 +201,7 @@ class DBSettingsView(MDScreen):
                     ),
                 ],
             )
-            self.category_delete_dialog_alert.open()
+        self.category_delete_dialog_alert.open()
 
     def category_delete_alert_dialog_on_close(self):
         """ Close and reset category delete alert dialog"""
@@ -228,8 +252,3 @@ class DeleteCategoryDialogItem(OneLineAvatarIconListItem):
     def set_icon(cls, instance_check):
         # switch check
         instance_check.active = not instance_check.active
-        # instance_check.active = True
-        # cls.check_list = instance_check.get_widgets(instance_check.group)
-        # for check in cls.check_list:
-        #     if check != instance_check:
-        #         check.active = False

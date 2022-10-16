@@ -38,6 +38,9 @@
     id: 'dbsettings_view'
     name: 'dbsettings_view'
 
+    on_enter:
+        # pass
+
     MDAnchorLayout:
         anchor_y: 'top'
         padding: [20, 20, 20, 20]
@@ -85,5 +88,16 @@
 
                 MDRectangleFlatButton:
                     text: 'Select Category'
+                    size_hint: (.6, 1)
+                    on_release: root.on_delete_category_button(app.theme_cls)
+
+            HSeparator:
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Export Database:'
+
+                MDRectangleFlatButton:
+                    text: 'Export'
                     size_hint: (.6, 1)
                     on_release: root.on_delete_category_button(app.theme_cls)

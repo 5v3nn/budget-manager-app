@@ -17,7 +17,7 @@
             size_hint: (.3, 1)
 
         TextInputMaxLength:
-            id: create_category_button
+            id: create_category_input
             text: ''
             max_length: 20
             multiline: False
@@ -79,7 +79,7 @@
                 MDRectangleFlatButton:
                     text: 'Create'
                     size_hint: (.6, 1)
-                    on_release: root.on_create_category_button(app.theme_cls)
+                    on_release: root.on_create_category_button()
 
             EntryField:
                 EntryFieldLabel:
@@ -89,13 +89,14 @@
                 MDRectangleFlatButton:
                     text: 'Select Category'
                     size_hint: (.6, 1)
-                    on_release: root.on_delete_category_button(app.theme_cls)
+                    on_release: root.on_delete_category_button()
 
             HSeparator:
 
             EntryField:
                 EntryFieldLabel:
                     text: 'Export Database:'
+                    size_hint: (.4, 1)
 
                 MDRectangleFlatButton:
                     text: 'Export'

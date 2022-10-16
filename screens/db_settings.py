@@ -40,10 +40,23 @@ class DBSettingsView(MDScreen):
         # init dialogs
         self.init_category_management_dialogs()
 
+    def on_back_button(self):
+        """
+        Go back to the default screen
+
+        :return:
+        """
+
+        # transition options
+        self.manager.transition = SlideTransition()
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'entry_view'
 
     # region category_management
     def init_category_management_dialogs(self):
         """ Init dialogs for the category management beforehand.  """
+
+        print('init category management dialogs')
 
         # create category dialog
         self.category_create_dialog = MDDialog(
@@ -70,6 +83,7 @@ class DBSettingsView(MDScreen):
         # delete category dialog
         self.category_delete_dialog = MDDialog(
             title="Select Category to Delete:",
+            # text='text',
             type="confirmation",
             auto_dismiss=False,
             buttons=[
@@ -89,12 +103,8 @@ class DBSettingsView(MDScreen):
             items=[],
         )
 
-    def on_create_category_button(self, theme_cls):
-        """Show Dialog for creating a new category, which will be added to the database.
-
-        :param theme_cls: theme class
-        :return:
-        """
+    def on_create_category_button(self):
+        """Show Dialog for creating a new category, which will be added to the database."""
 
         if not self.category_create_dialog:
             self.init_category_management_dialogs()
@@ -103,13 +113,14 @@ class DBSettingsView(MDScreen):
 
     def category_create_dialog_on_close(self):
         """ Close and reset category create dialog"""
+
+        self.category_create_dialog.content_cls.ids['create_category_input'].text = ''  # reset input field content
         self.category_create_dialog.dismiss()
-        self.category_create_dialog = None
 
     def category_create_dialog_on_create(self):
         """ Create a new category and submit to database """
 
-        category_name = self.category_create_dialog.content_cls.ids['create_category_button'].text
+        category_name = self.category_create_dialog.content_cls.ids['create_category_input'].text
 
         if not category_name:
             self.category_create_dialog_on_close()
@@ -135,22 +146,27 @@ class DBSettingsView(MDScreen):
         :return:
         """
 
-        #todo remove arguments
-
         if not self.category_delete_dialog:
             self.init_category_management_dialogs()
 
-        # set dialog items
+        [print(category_name) for category_name in DataManagement().get_categories()]
+
+        # set dialog items; list all categories
         self.category_delete_dialog.update_items([
             DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
         ])
+
+        # self.category_delete_dialog.items.clear()
+        # self.category_delete_dialog.items = [
+        #     DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
+        # ]
+        # self.category_delete_dialog.create_items()
 
         self.category_delete_dialog.open()
 
     def category_delete_dialog_on_close(self):
         """ Close and reset category delete dialog"""
         self.category_delete_dialog.dismiss()
-        self.category_delete_dialog = None
 
     def category_delete_dialog_on_delete(self, theme_cls):
         """ creates an alert dialog to confirm deletion of category """

@@ -5,7 +5,8 @@ This script handles the screen where entries are added.
 from kivy.core.window import Window
 # import kivy modules
 from kivy.metrics import dp
-from kivy.properties import BooleanProperty, NumericProperty, StringProperty, ListProperty
+from kivy.properties import BooleanProperty, NumericProperty, StringProperty, ListProperty, ObjectProperty
+from kivymd.uix.label import MDLabel
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
@@ -16,11 +17,13 @@ from kivymd.uix.textfield import MDTextField
 
 # import modules
 import datetime
+from datetime import date
+import calendar
 
 # import scripts
 import data_management
 import loghandler
-
+from assets.date_selector.date_selector import DateSelector
 
 # path to log file from main.pys view
 LOG_FILE_ENTRY_VIEW = "./logs/entry_add_view.log"
@@ -49,13 +52,43 @@ class EntryAddView(MDScreen):
     earning_or_cost_field_id = ListProperty()  # ['label_id', 'input_id']
     earning_or_cost_field_label_text_value = ListProperty()  # ['income_text', 'expense_text']
 
+    def __init__(self, **kwargs):
+        super(EntryAddView, self).__init__(**kwargs)
+
+        # create select category dropdown menu
+        self.init_category_select_dropdown()
+
+        # init date picker
+        self.init_date_picker_dialog()
+
+    def init_category_select_dropdown(self):
+        """ Init category select dropdown menu """
+
+        # create dropdown menu
+        self.menu_select_category = MDDropdownMenu(
+            width_mult=4,
+            border_margin=10,
+            position='bottom',
+            ver_growth='down',
+            elevation=10,
+        )
+
+    def init_date_picker_dialog(self):
+        """ Init date picker dialog """
+
+        # create date picker dialog
+        self.date_dialog = DateSelector()
+        # bind functions to it
+        self.date_dialog.bind(on_save=self.date_picker_on_save, on_cancel=self.date_picker_on_cancel)
 
     def create_menu_select_category(self):
-        """
-        Create menu dropdown to select the category which will be submitted to create a new entry.
+        """ Populate menu dropdown to select the category which will be submitted to create a new entry.
 
         :return:
         """
+
+        if not self.menu_select_category:
+            self.init_category_select_dropdown()
 
         # define dropdown menu items
         items = [
@@ -64,20 +97,12 @@ class EntryAddView(MDScreen):
                 "viewclass": "OneLineListItem",
                 "height": dp(54),
                 "on_release": lambda x=category: self.on_menu_select_category(str(x)),
-            }
-            for category in data_management.DataManagement().get_categories()
+            } for category in data_management.DataManagement().get_categories()
         ]
 
-        # create dropdown menu
-        self.menu_select_category = MDDropdownMenu(
-            caller=self.ids[self.select_category_caller_id],
-            items=items,
-            width_mult=4,
-            border_margin=10,
-            position='bottom',
-            ver_growth='down',
-            elevation=10,
-        )
+        # add caller and items
+        self.menu_select_category.caller = self.ids[self.select_category_caller_id]
+        self.menu_select_category.items = items
 
         # logging
         loghandler.write_log(
@@ -106,34 +131,30 @@ class EntryAddView(MDScreen):
 
         return str(data_management.DataManagement().get_categories()[0])
 
-    # region date_picker
-    def date_picker_create(self):
-        """ Create date picker"""
+    def update_date_picker(self):
+        if not self.date_dialog:
+            self.init_date_picker_dialog()
 
-        # create date picker dialog
-        self.date_dialog = MDDatePicker()
-        # bind functions to it
-        self.date_dialog.bind(on_save=self.date_picker_on_save, on_cancel=self.date_picker_on_cancel)
+        # print(f"reset date picker day to {int(self.ids[self.date_picker_id].text.split('-')[-1])}")
+        self.date_dialog.reset_select_widget(int(self.ids[self.date_picker_id].text.split('-')[-1]))
 
     def date_picker_show(self):
         """Open date picker."""
 
         if self.date_dialog is None:
-            self.date_picker_create()
+            self.init_date_picker_dialog()
+
+        # year, month, day = self.ids[self.date_picker_id].text.split('-')
+        # self.update_date_picker_ui(int(year), int(month), int(day))
+
+        # for idx in range(len(self.date_dialog._calendar_list)):
+        #     print('show case: ', self.date_dialog._calendar_list[idx].text, self.date_dialog._calendar_list[idx].is_selected)
 
         # open date picker dialog
         self.date_dialog.open()
 
-    def date_picker_on_save(self, instance, value, date_range):
-        """
-        Events called when the "OK" dialog box button is clicked.
-
-        :type instance: <kivymd.uix.picker.MDDatePicker object>;
-        :param value: selected date;
-        :type value: <class 'datetime.date'>;
-        :param date_range: list of 'datetime.date' objects in the selected range;
-        :type date_range: <class 'list'>;
-        """
+    def date_picker_on_save(self, instance, value):
+        # print(f"Date Selector value: %s" % value)
 
         # set button text to date:
         self.ids[self.date_picker_id].text = str(value)
@@ -222,7 +243,7 @@ class EntryAddView(MDScreen):
         self.ids[self.item_input_id].text = ''
         self.ids[self.select_category_caller_id].text = self.get_default_category()
         self.ids[self.date_picker_id].text = self.get_default_date()
-        self.date_dialog = None
+        # self.date_dialog = None
         self.ids[self.earning_or_cost_field_id[1]].text = ''  # money value
 
 
@@ -284,4 +305,6 @@ class MoneyValueInput(MDTextField):
 
         # call parent function, otherwise it doesn't work
         MDTextField._on_focus(self, instance, value, *largs)
+
+
 

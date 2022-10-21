@@ -1,0 +1,314 @@
+#:import os os
+#:import date datetime.date
+#:import calendar calendar
+#: import DateSelector assets.date_selector.date_selector
+#:import images_path kivymd.images_path
+
+<DateSelector>
+    _calendar_layout: _calendar_layout
+    size_hint: None, None
+    size:
+        (dp(328), dp(512) - root._shift_dialog_height) \
+        if root.theme_cls.device_orientation == "portrait" \
+        else (dp(528), dp(328) - root._shift_dialog_height)
+
+
+    MDRelativeLayout:
+        id: container
+        background: os.path.join(images_path, "transparent.png")
+
+        canvas:
+            Color:
+                rgb:
+                    app.theme_cls.primary_color \
+                    if not root.primary_color else root.primary_color
+            RoundedRectangle:
+                size:
+                    (dp(328), dp(80)) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (dp(168), dp(328) - root._shift_dialog_height)
+                pos:
+                    (0, root.height - dp(80)) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (0, 0)
+                radius:
+                    (root.radius[0], root.radius[1], dp(0), dp(0)) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (root.radius[0], dp(0), dp(0), root.radius[3])
+            Color:
+                rgba:
+                    app.theme_cls.bg_normal
+            RoundedRectangle:
+                size:
+                    (dp(328), dp(512) - dp(80) - root._shift_dialog_height) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (dp(360), dp(328) - root._shift_dialog_height)
+                pos:
+                    (0, 0) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (dp(168), 0)
+                radius:
+                    (dp(0), dp(0), root.radius[2], root.radius[3]) \
+                    if root.theme_cls.device_orientation == "portrait" \
+                    else (dp(0), root.radius[1], root.radius[2], dp(0))
+
+        MDLabel:
+            id: label_full_date
+            font_style: "H4"
+            theme_text_color: "Custom"
+            size_hint_x: None
+            width: root.width
+            adaptive_height: True
+            font_name: root.font_name
+            markup: True
+            pos:
+                (dp(24), root.height - dp(80) + dp(18)) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else \
+                ( \
+                dp(24) if not root._input_date_dialog_open else dp(168) + dp(24), \
+                root.height - self.height - dp(96) \
+                )
+            text: root.title
+            text_color:
+                ( \
+                root.specific_text_color \
+                if not root.text_toolbar_color else root.text_toolbar_color \
+                ) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else \
+                ( \
+                ( \
+                self.theme_cls.primary_color \
+                if not root.primary_color else root.primary_color \
+                ) \
+                if root._input_date_dialog_open \
+                else \
+                ( \
+                root.specific_text_color \
+                if not root.text_toolbar_color else root.text_toolbar_color \
+                ) \
+                )
+
+        RecycleView:
+            id: _year_layout
+            key_viewclass: "viewclass"
+            size_hint: None, None
+            size: _calendar_layout.size
+            pos: _calendar_layout.pos
+            disabled: True
+
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: root._scale_year_layout
+                    y: root._scale_year_layout
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+
+            SelectYearList:
+                cols: 3
+                default_size: dp(170), dp(36)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDLabel:
+            id: label_month_selector
+            font_style: "Body2"
+            -text_size: None, None
+            theme_text_color: "Custom"
+            adaptive_size: True
+            text: calendar.month_name[root.month].capitalize() + " " + str(root.year)
+            font_name: root.font_name
+            pos:
+                (dp(24), root.height - dp(80) - self.height - dp(20)) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else (dp(168) + dp(24), _year_layout.y)
+            text_color:
+                app.theme_cls.text_color \
+                if not root.text_color else root.text_color
+
+        # DateSelectorIconButton:
+        #     id: triangle
+        #     owner: root
+        #     icon: "menu-down"
+        #     ripple_scale: .5
+        #     theme_icon_color: "Custom"
+        #     hint_text: "Choose year"
+        #     on_release:
+        #         root.transformation_to_dialog_select_year() \
+        #         if not root._select_year_dialog_open else \
+        #         root.transformation_from_dialog_select_year()
+        #     pos:
+        #         (label_month_selector.width + dp(14), root.height - dp(83) - self.height) \
+        #         if root.theme_cls.device_orientation == "portrait" \
+        #         else (dp(180) + label_month_selector.width, _year_layout.y - dp(14))
+        #     text_color:
+        #         app.theme_cls.text_color \
+        #         if not root.text_color else root.text_color
+        #     md_bg_color_disabled: 0, 0, 0, 0
+
+        DateSelectorIconButton:
+            id: chevron_left
+            owner: root
+            icon: "chevron-left"
+            on_release: root.change_month("prev")
+            theme_icon_color: "Custom"
+            hint_text: "Previous month"
+            x:
+                dp(228) if root.theme_cls.device_orientation == "portrait" \
+                else dp(418)
+            y:
+                root.height - dp(80) - self.height / 2 - dp(30) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else dp(272)
+            text_color:
+                app.theme_cls.text_color \
+                if not root.text_color else root.text_color
+
+        DateSelectorIconButton:
+            id: chevron_right
+            owner: root
+            icon: "chevron-right"
+            on_release: root.change_month("next")
+            theme_icon_color: "Custom"
+            hint_text: "Next month"
+            x:
+                dp(272) if root.theme_cls.device_orientation == "portrait" \
+                else dp(464)
+            y:
+                root.height - dp(80) - self.height / 2 - dp(30) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else dp(272)
+            text_color:
+                app.theme_cls.text_color \
+                if not root.text_color else root.text_color
+
+        # Calendar items layout
+        GridLayout:
+            id: _calendar_layout
+            cols: 7
+            size_hint: None, None
+            size:
+                (dp(44 * 7), dp(40 * 7)) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else (dp(46 * 7), dp(32 * 7))
+            col_default_width:
+                dp(42) if root.theme_cls.device_orientation == "portrait" \
+                else dp(39)
+            padding:
+                (dp(2), 0) if root.theme_cls.device_orientation == "portrait" \
+                else (dp(7), 0)
+            spacing:
+                (dp(2), 0) if root.theme_cls.device_orientation == "portrait" \
+                else (dp(7), 0)
+            pos:
+                (dp(10), dp(56)) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else (dp(168) + dp(20), dp(44))
+
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: root._scale_calendar_layout
+                    y: root._scale_calendar_layout
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+
+        MDFlatButton:
+            id: ok_button
+            width: dp(32)
+            pos: root.width - self.width, dp(10)
+            text: "OK"
+            theme_text_color: "Custom"
+            font_name: root.font_name
+            text_color:
+                root.theme_cls.primary_color \
+                if not root.text_button_color else \
+                root.text_button_color
+            on_release: root.on_ok_button_pressed()
+
+        MDFlatButton:
+            id: cancel_button
+            text: "CANCEL"
+            on_release: root.dispatch("on_cancel", None)
+            theme_text_color: "Custom"
+            pos: root.width - self.width - ok_button.width - dp(10), dp(10)
+            font_name: root.font_name
+            text_color:
+                root.theme_cls.primary_color \
+                if not root.text_button_color else \
+                root.text_button_color
+
+
+<DateSelectorWeekdayLabel>
+    font_style: "Caption"
+    theme_text_color: "Custom"
+    size_hint: None, None
+    text_size: self.size
+    halign: "center"
+    valign:
+        "middle" if root.theme_cls.device_orientation == "portrait" \
+        else "center"
+    size:
+        (dp(40), dp(40)) if root.theme_cls.device_orientation == "portrait" \
+        else (dp(32), dp(32))
+    text_color:
+        app.theme_cls.disabled_hint_text_color \
+        if not root.owner.text_weekday_color else root.owner.text_weekday_color
+
+<DateSelectorDaySelectableItem>
+    size_hint: None, None
+    size:
+        (dp(42), dp(42)) \
+        if root.theme_cls.device_orientation == "portrait" \
+        else (dp(32), dp(32))
+    disabled: True
+
+    canvas:
+        Color:
+            rgba:
+                ( \
+                ( \
+                self.theme_cls.primary_color if not root.owner.selector_color \
+                else root.owner.selector_color \
+                ) \
+                if root.is_selected and not self.disabled \
+                else (0, 0, 0, 0) \
+                )
+        Ellipse:
+            size:
+                (dp(42), dp(42)) \
+                if root.theme_cls.device_orientation == "portrait" \
+                else (dp(32), dp(32))
+            pos: self.pos
+
+    MDLabel:
+        font_style: "Caption"
+        size_hint_x: None
+        halign: "center"
+        text: root.text
+        font_name: root.owner.font_name
+        theme_text_color: "Custom"
+        text_color:
+            ( \
+            root.theme_cls.primary_color \
+            if not root.owner.text_current_color \
+            else root.owner.text_current_color \
+            ) \
+            if root.is_today and not root.is_selected \
+            else ( \
+            ( \
+            root.theme_cls.text_color \
+            if not root.is_selected \
+            else (1, 1, 1, 1) \
+            ) \
+            if not root.owner.text_color \
+            else \
+            ( \
+            root.owner.text_color \
+            if not root.is_selected else (1, 1, 1, 1)) \
+            )

@@ -30,10 +30,10 @@
     earning_or_cost_field_label_text_value: ['Earning:', 'Cost:']
 
     on_pre_enter:
-        # create menu dropdown to select the category
+        # populate menu dropdown to select the category with correct items
         root.create_menu_select_category()
         # create date picker
-        root.date_picker_create()
+        root.update_date_picker()
         # set default earning_or_cost_field_label text
         root.add_entry_type = root.default_entry_type
         root.set_earning_or_cost_fields()

@@ -134,7 +134,7 @@ class EntryView(MDScreen):
         ]
         # add total costs
         row_data = row_data + [
-            ["", "", "[b]Total:[/b]", str(sum([get_float(d[3]) for d in row_data])), '']
+            ["", "", "[b]Total:[/b]", f"{(sum([get_float(d[3]) for d in row_data])):.2f}", '']
         ]
 
         # store here the data table

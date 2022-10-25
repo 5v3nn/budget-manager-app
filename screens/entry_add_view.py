@@ -132,11 +132,15 @@ class EntryAddView(MDScreen):
         return str(data_management.DataManagement().get_categories()[0])
 
     def update_date_picker(self):
+        """ called in the kivy file in on_pre_entry """
+
         if not self.date_dialog:
             self.init_date_picker_dialog()
 
         # print(f"reset date picker day to {int(self.ids[self.date_picker_id].text.split('-')[-1])}")
-        self.date_dialog.reset_select_widget(int(self.ids[self.date_picker_id].text.split('-')[-1]))
+        year, month, day = [int(d) for d in self.ids[self.date_picker_id].text.split('-')]
+
+        self.date_dialog.reset_select_widget(year, month, day)
 
     def date_picker_show(self):
         """Open date picker."""

@@ -61,7 +61,7 @@
                         root.on_back_button()
 
                 MDLabel:
-                    text: '[b]Manage Categories[/b]'
+                    text: '[b]Manage Database[/b]'
                     font_size: '24px'
                     valign: 'center'
                     halign: 'left'
@@ -95,10 +95,22 @@
 
             EntryField:
                 EntryFieldLabel:
+                    text: 'Delete Month:'
+                    size_hint: (.4, 1)
+
+                MDRectangleFlatButton:
+                    text: 'Select Month'
+                    size_hint: (.6, 1)
+                    on_release: root.on_delete_month_button()
+
+            HSeparator:
+
+            EntryField:
+                EntryFieldLabel:
                     text: 'Export Database:'
                     size_hint: (.4, 1)
 
                 MDRectangleFlatButton:
                     text: 'Export'
                     size_hint: (.6, 1)
-                    on_release: root.on_delete_category_button(app.theme_cls)
+                    on_release: print('todo')

@@ -295,7 +295,7 @@ class EntryView(MDScreen):
 
         # update items
         # define dropdown menu items
-        self.menu_select_display_month.items = [
+        items = [
             {
                 "text": f"{month}",
                 "viewclass": "OneLineListItem",
@@ -303,13 +303,19 @@ class EntryView(MDScreen):
                 "on_release": lambda x=month: self.on_menu_select_display_month(str(x)),
             } for month in data_management.DataManagement().get_available_dates()
         ]
+        items.reverse()  # reverse, so the newest item is on top
+        self.menu_select_display_month.items = items
+
+        # if _selected_display_month is not in items anymore, get default one
+        if self._selected_display_month:
+            if self._selected_display_month not in items:
+                self._selected_display_month = self.get_default_display_month()
 
         # logging
         loghandler.write_log(
             LOG_FILE_ENTRY_VIEW,
             f"Created dropdown menu; items: {self.menu_select_display_month.items};"
         )
-
 
     def on_menu_select_display_month(self, month: str):
         """

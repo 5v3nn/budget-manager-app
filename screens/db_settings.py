@@ -13,9 +13,13 @@ from save_system import SaveSystem
 from data_management import DataManagement
 from kivymd.app import MDApp
 
+import loghandler
+
 
 class DBSettingsView(MDScreen):
     """ Settings screen"""
+
+    LOG_FILE = './logs/db_settings.log'
 
     app = None
 
@@ -26,8 +30,10 @@ class DBSettingsView(MDScreen):
     category_create_dialog = None
     category_delete_dialog = None
     category_delete_dialog_alert = None
+    _category_items_to_delete = []
     month_delete_dialog = None
     month_delete_dialog_alert = None
+    _month_items_to_delete = []
 
 
     def __init__(self, **kwargs):
@@ -57,7 +63,7 @@ class DBSettingsView(MDScreen):
     def init_category_management_dialogs(self):
         """ Init dialogs for the category management beforehand.  """
 
-        print('init category management dialogs')
+        print('init database management dialogs')
 
         # create category dialog
         self.category_create_dialog = MDDialog(
@@ -98,10 +104,30 @@ class DBSettingsView(MDScreen):
                     text="Delete",
                     theme_text_color="Custom",
                     text_color=self.theme_class.primary_color,
-                    on_release=lambda x: self.category_delete_dialog_on_delete(self.theme_class)
+                    on_release=lambda x: self.category_delete_dialog_on_delete()
                 ),
             ],
             items=[],
+        )
+
+        # delete category alert confirmation dialog
+        self.category_delete_dialog_alert = MDDialog(
+            title='',
+            text='',
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_delete_alert_dialog_on_close()
+                ),
+                MDFlatButton(
+                    text="Delete",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.category_delete_alert_dialog_on_confirm()
+                ),
+            ],
         )
 
         # delete month dialog
@@ -115,16 +141,36 @@ class DBSettingsView(MDScreen):
                     text="Cancel",
                     theme_text_color="Custom",
                     text_color=self.theme_class.primary_color,
-                    on_release=lambda x: self.category_delete_dialog_on_close()  # todo
+                    on_release=lambda x: self.month_delete_dialog_on_close()
                 ),
                 MDFlatButton(
                     text="Delete",
                     theme_text_color="Custom",
                     text_color=self.theme_class.primary_color,
-                    on_release=lambda x: self.category_delete_dialog_on_delete(self.theme_class)  # todo
+                    on_release=lambda x: self.month_delete_dialog_on_delete()
                 ),
             ],
             items=[],
+        )
+
+        # delete month alert confirmation dialog
+        self.month_delete_dialog_alert = MDDialog(
+            title='',
+            text='',
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.month_delete_alert_dialog_on_close()
+                ),
+                MDFlatButton(
+                    text="Delete",
+                    theme_text_color="Custom",
+                    text_color=self.theme_class.primary_color,
+                    on_release=lambda x: self.month_delete_alert_dialog_on_confirm()
+                ),
+            ],
         )
 
 
@@ -184,30 +230,13 @@ class DBSettingsView(MDScreen):
             DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
         ])
 
-        # items = [
-        #     DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
-        # ]
-        # self.category_delete_dialog.ids.box_items.clear_widgets()
-        # self.category_delete_dialog.items = items
-        # self.category_delete_dialog.text = " "
-        # self.category_delete_dialog.create_items()
-
-
-
-
-        # self.category_delete_dialog.items.clear()
-        # self.category_delete_dialog.items = [
-        #     DeleteCategoryDialogItem(text=f"{category_name}") for category_name in DataManagement().get_categories()
-        # ]
-        # self.category_delete_dialog.create_items()
-
         self.category_delete_dialog.open()
 
     def category_delete_dialog_on_close(self):
         """ Close and reset category delete dialog"""
         self.category_delete_dialog.dismiss()
 
-    def category_delete_dialog_on_delete(self, theme_cls):
+    def category_delete_dialog_on_delete(self):
         """ creates an alert dialog to confirm deletion of category """
 
         # get items text by iterating through the items, i.e. category list
@@ -238,43 +267,41 @@ class DBSettingsView(MDScreen):
         # alert box for confirmation to delete category and related entries
         if not self.category_delete_dialog_alert:
             # it's okay to create dialog here, since this one doesn't cost too much.
-            self.category_delete_dialog_alert = MDDialog(
-                title=alert_title,
-                text=alert_text,
-                buttons=[
-                    MDFlatButton(
-                        text="Cancel",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_delete_alert_dialog_on_close()
-                    ),
-                    MDFlatButton(
-                        text="Delete",
-                        theme_text_color="Custom",
-                        text_color=theme_cls.primary_color,
-                        on_release=lambda x: self.category_delete_alert_dialog_on_confirm(items_to_delete)
-                    ),
-                ],
-            )
+            self.init_category_management_dialogs()
+
+        # assign title and text
+        self.category_delete_dialog_alert.title = alert_title
+        self.category_delete_dialog_alert.text = alert_text
+
+        # assign items_to_delete
+        self._category_items_to_delete = items_to_delete[:]
+
+        # open
         self.category_delete_dialog_alert.open()
 
     def category_delete_alert_dialog_on_close(self):
         """ Close and reset category delete alert dialog"""
         self.category_delete_dialog_alert.dismiss()
-        self.category_delete_dialog_alert = None
+        self._category_items_to_delete = []  # make sure list it empty again
         self.category_delete_dialog_on_close()
 
-    def category_delete_alert_dialog_on_confirm(self, items_to_delete):
+    def category_delete_alert_dialog_on_confirm(self):
         """ submit deletion to database """
 
-        print(f"delete categories: {items_to_delete}")
+        # get items_to_delete
+        items_to_delete = self._category_items_to_delete
+
+        if not items_to_delete:
+            loghandler.write_log(self.LOG_FILE, f"No categories selected to delete; cancel process;")
+            return
 
         # make deletion on database
         for item in items_to_delete:
             DataManagement().del_category(item)
+        loghandler.write_log(self.LOG_FILE, f"Deleted categories: {items_to_delete};")
 
         # create snackbar text
-        alert_text = f"Deleted category: '{items_to_delete[0]}'?"
+        alert_text = f"Deleted category: '{items_to_delete[0]}'."
         # change alert title and text if there are mor than one category to delete
         if len(items_to_delete) > 1:
             alert_text = f"Deleted categories: "
@@ -288,13 +315,116 @@ class DBSettingsView(MDScreen):
                  size_hint_x=(Window.width - (dp(20) * 2)) / Window.width,
                  duration=3,
                  ).open()
+
         # close dialog
         self.category_delete_alert_dialog_on_close()
     # endregion
 
     # region delete_month
+    def on_delete_month_button(self):
+        """Show Dialog for deleting a month, which will be submitted to the database.
 
+        :return:
+        """
 
+        if not self.month_delete_dialog:
+            self.init_category_management_dialogs()
+
+        [print(category_name) for category_name in DataManagement().get_categories()]
+
+        # set dialog items; list all categories
+        self.month_delete_dialog.update_items([
+            DeleteCategoryDialogItem(text=f"{month_name}") for month_name in DataManagement().get_available_dates()
+        ])
+
+        self.month_delete_dialog.open()
+
+    def month_delete_dialog_on_close(self):
+        """ Close and reset month delete dialog"""
+        self.month_delete_dialog.dismiss()
+
+    def month_delete_dialog_on_delete(self):
+        """ creates an alert dialog to confirm deletion of month """
+
+        # get items text by iterating through the items, i.e. month list
+        items_to_delete = self.month_delete_dialog.get_all_checked_items()
+
+        print(f"month checked items: {items_to_delete}")
+
+        if not items_to_delete:
+            self.month_delete_dialog_on_close()
+            return
+
+        # get number of items to delete
+        nr_of_entries_to_delete = 0
+        for item in items_to_delete:
+            nr_of_entries_to_delete += len(DataManagement().get_entries_by_date(item))
+
+        # create alert title and text
+        alert_title, alert_text = "Delete Month?", f"Delete month: '{items_to_delete[0]}',\nand {nr_of_entries_to_delete} related entries?"
+        # change alert title and text if there are mor than one category to delete
+        if len(items_to_delete) > 1:
+            alert_title, alert_text = "Delete months?", f"Delete months: "
+            for i in range(len(items_to_delete)):
+                alert_text += f"'{items_to_delete[i]}'" + ", "
+            alert_text += f"\nand {nr_of_entries_to_delete} related entries?"
+
+        # alert box for confirmation to delete category and related entries
+        if not self.month_delete_dialog_alert:
+            # it's okay to create dialog here, since this one doesn't cost too much.
+            self.init_category_management_dialogs()
+
+        # assign title and text
+        self.month_delete_dialog_alert.title = alert_title
+        self.month_delete_dialog_alert.text = alert_text
+
+        # assign items_to_delete
+        self._month_items_to_delete = items_to_delete[:]
+
+        # open
+        self.month_delete_dialog_alert.open()
+
+    def month_delete_alert_dialog_on_close(self):
+        """ Close and reset month delete alert dialog"""
+        self.month_delete_dialog_alert.dismiss()
+        self._month_items_to_delete = []  # make sure list it empty again
+        self.month_delete_dialog_on_close()
+
+    def month_delete_alert_dialog_on_confirm(self):
+        """ submit deletion to database """
+
+        print('')
+
+        # get items_to_delete
+        items_to_delete = self._month_items_to_delete
+
+        if not items_to_delete:
+            loghandler.write_log(self.LOG_FILE, f"No months selected to delete; cancel process;")
+            return
+
+        # make deletion on database
+        for item in items_to_delete:
+            DataManagement().del_month(item)
+        loghandler.write_log(self.LOG_FILE, f"Deleted months: {items_to_delete};")
+
+        # create snackbar text
+        alert_text = f"Deleted month: '{items_to_delete[0]}'."
+        # change alert title and text if there are mor than one category to delete
+        if len(items_to_delete) > 1:
+            alert_text = f"Deleted months: "
+            for i in range(len(items_to_delete)):
+                alert_text += f"'{items_to_delete[i]}'" + (", " if i <= len(items_to_delete) - 2 else "")
+
+        # create a quick snackbar as feedback that category/ies was deleted
+        Snackbar(text=alert_text,
+                 snackbar_x='20dp',
+                 snackbar_y='20dp',
+                 size_hint_x=(Window.width - (dp(20) * 2)) / Window.width,
+                 duration=3,
+                 ).open()
+
+        # close dialog
+        self.month_delete_alert_dialog_on_close()
     # endregion
 
 
@@ -305,6 +435,24 @@ class CreateCategoryDialog(MDBoxLayout):
 
 class CheckboxItemsDialog(MDDialog):
     """ Dialog with checkboxes """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get_all_checked_items(self) -> list:
+
+        checked_items = []
+
+        try:
+            for item in self.items:
+                # if item is checked add to deletion list
+                if item.ids['check'].active:
+                    checked_items.append(item.text)
+
+        except:
+            return []
+
+        return checked_items
 
     def update_items(self, items: list) -> None:
         self.ids.box_items.clear_widgets()
@@ -336,6 +484,16 @@ class CheckboxItemsDialog(MDDialog):
             self.ids.scroll.height = self.get_normal_height()
         else:
             self.ids.scroll.height = height
+
+
+class DeleteCategoryCheckboxItemsDialog(CheckboxItemsDialog):
+
+    def __init__(self,  **kwargs):
+
+        super().__init__(**kwargs)
+
+
+
 
 
 class DeleteCategoryDialogItem(OneLineAvatarIconListItem):

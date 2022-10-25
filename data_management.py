@@ -127,8 +127,16 @@ class DataManagement:
         # calculate start year/month and end year/month
         try:
             start_y, start_m = [int(d) for d in date_yyyymm.split('-')]
-            end_m = (start_m + 1) % 12
-            end_y = start_y if start_m < end_m else (start_y + 1)
+            # end_m = (start_m + 1) % 12
+            # end_y = start_y if start_m < end_m else (start_y + 1)
+            end_m = (
+                12
+                if start_m + 1 == 0
+                else 1
+                if start_m + 1 == 13
+                else start_m + 1
+            )
+            end_y = start_y + 1 if start_m + 1 == 13 else start_y
 
         except Exception as date_err:
             err_msg = f"GET ENTRY BY DATE FORMAT ERROR: {str(date_err)}"
@@ -138,7 +146,7 @@ class DataManagement:
 
         con, cur = self.start_connection()
 
-        # "SELECT substr(e.date, 9), e.name, c.category, e.value, substr(e.ROWID, 0) "  # todo add the rowid for deletion process
+        # "SELECT substr(e.date, 9), e.name, c.category, e.value, substr(e.ROWID, 0) "
         sql_statement = "SELECT substr(e.date, 9), e.name, c.category, e.value, e.ROWID " + "FROM category as c " + \
                         "JOIN entry as e " + \
                         "ON e.category_id = c.ROWID " + \
@@ -200,6 +208,29 @@ class DataManagement:
                                  print_log=True)
 
         self.end_connection(con)
+
+    def del_month(self, date_yyyymm: str):
+
+        # do nothing if category is empty
+        if not date_yyyymm:
+            return
+
+        # get entries by date
+        entries_with_date = self.get_entries_by_date(date_yyyymm)
+
+        # connect
+        con, cur = self.start_connection()
+
+        try:
+            # delete category
+            cur.execute(f"DELETE FROM {self.entry_table_name} WHERE date LIKE '{date_yyyymm}%'")
+
+        except Exception as del_err:
+            loghandler.write_log(self.PATH_LOGFILE, 'SQL MONTH DELETE ERROR: %s' % str(del_err))
+
+        # commit
+        self.end_connection(con)
+
 
     def add_category(self, category):
 
@@ -272,3 +303,5 @@ class DataManagement:
 
         # commit
         self.end_connection(con)
+
+

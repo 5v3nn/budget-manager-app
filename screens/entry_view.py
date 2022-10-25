@@ -1,20 +1,16 @@
 """
 This script handles the entry view where the entries are displayed.
 """
-from kivy.clock import Clock
 # import kivy modules
 from kivy.properties import StringProperty
-from kivy.uix.screenmanager import SwapTransition, SlideTransition, NoTransition
+from kivy.uix.screenmanager import SlideTransition, NoTransition
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDRectangleFlatButton, MDRoundFlatButton, MDFlatButton, MDIconButton, MDTextButton
-from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
 from kivy.metrics import dp
-from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.scrollview import MDScrollView
-from kivy.graphics.svg import Svg
 
 # import scripts
 import data_management
@@ -38,6 +34,7 @@ class EntryView(MDScreen):
     # select month dropdown menu
     select_display_month_caller_id = 'dropdown_select_month_button'
     menu_select_display_month = None
+    _selected_display_month = None
 
 
     @staticmethod
@@ -67,6 +64,9 @@ class EntryView(MDScreen):
         :param display_month: date of month to display in format YYYY-MM
         :return: None
         """
+
+        # assign selected month
+        self._selected_display_month = display_month
 
         def get_float(string):
             try:
@@ -280,8 +280,22 @@ class EntryView(MDScreen):
         :return:
         """
 
+        if not self.menu_select_display_month:
+            # create dropdown menu
+            self.menu_select_display_month = MDDropdownMenu(
+                caller=self.ids[self.select_display_month_caller_id],
+                # items=items,
+                items=[],
+                width_mult=4,
+                border_margin=10,
+                position='bottom',
+                ver_growth='down',
+                elevation=10,
+            )
+
+        # update items
         # define dropdown menu items
-        items = [
+        self.menu_select_display_month.items = [
             {
                 "text": f"{month}",
                 "viewclass": "OneLineListItem",
@@ -290,22 +304,12 @@ class EntryView(MDScreen):
             } for month in data_management.DataManagement().get_available_dates()
         ]
 
-        # create dropdown menu
-        self.menu_select_display_month = MDDropdownMenu(
-            caller=self.ids[self.select_display_month_caller_id],
-            items=items,
-            width_mult=4,
-            border_margin=10,
-            position='bottom',
-            ver_growth='down',
-            elevation=10,
-        )
-
         # logging
         loghandler.write_log(
             LOG_FILE_ENTRY_VIEW,
-            f"Created dropdown menu; items: {items};"
+            f"Created dropdown menu; items: {self.menu_select_display_month.items};"
         )
+
 
     def on_menu_select_display_month(self, month: str):
         """

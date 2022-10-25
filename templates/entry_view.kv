@@ -14,11 +14,13 @@
 
     on_pre_enter:
         # create menu dropdown to select the month to display
-        root.create_menu_select_display_month()
+        root.create_menu_select_display_month()  # does handle update as well
 
     on_enter:
         # load screen with data table already loaded
-        root.show_data_table(root.get_default_display_month())
+        root.show_data_table(root.get_default_display_month() \
+        if not root._selected_display_month \
+        else root._selected_display_month)
 
     MDAnchorLayout:
         anchor_y: 'center'

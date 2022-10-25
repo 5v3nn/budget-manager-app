@@ -446,9 +446,11 @@ class DateSelector(BaseDateSelector):
                         self.set_select_widget(self._calendar_list[idx])
                         break
 
-    def reset_select_widget(self, day: int):
+    def reset_select_widget(self, year: int, month: int, day: int):
         """ Reset the select widget
 
+        :param month:
+        :param year:
         :param day: set to day
         """
 
@@ -458,9 +460,11 @@ class DateSelector(BaseDateSelector):
         self._sel_day_widget = None
 
         # reassign day
+        self.year, self.month = year, month
+        self.update_calendar(year, month)
         self.set_select_widget_to_day(day)
 
-        self._last_on_save_value = date(self.year, self.month, day)
+        self._last_on_save_value = date(year, month, day)
 
     def change_month(self, operation: str) -> None:
         """

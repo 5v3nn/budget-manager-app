@@ -23,9 +23,11 @@ Keep in mind by deleting a category, it will delete the entries with that catego
 Currently, we have the following functionalities implemented:
 - Displaying entries from the Database by month
 - Adding new entries to the database as income or expense 
-- Deleting entries from the database
 - Adding categories to the database
+- Deleting entries from the database
 - Deleting categories and related entries from the database
+- Deleting entries from whole month
+- Importing (merge) and exporting the database
 
 
 ### Known Issues

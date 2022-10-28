@@ -102,7 +102,7 @@ class DataManagement:
             )
             category_id = cur.fetchall()[0][0]
             cur.execute(
-                "INSERT INTO " + self.entry_table_name + " AS e "
+                "INSERT OR IGNORE INTO " + self.entry_table_name + " AS e "
                 + "VALUES ("
                 + '"' + str(category_id) + '",'
                 + '"' + str(name) + '",'
@@ -169,11 +169,13 @@ class DataManagement:
 
         return entries
 
-    def get_entries_by_category(self, category: str) -> list:
+    def get_entries_by_category(self, category: str, full_date=False) -> list:
 
         con, cur = self.start_connection()
 
-        sql_statement = f"SELECT substr(e.date, 9), e.name, c.category, e.value, e.ROWID " + "FROM category as c " + \
+        date_restriction = "e.date" if full_date else "substr(e.date, 9)"
+
+        sql_statement = f"SELECT {date_restriction}, e.name, c.category, e.value, e.ROWID " + "FROM category as c " + \
                         f"JOIN entry as e " + \
                         f"ON e.category_id = c.ROWID " + \
                         f"WHERE c.category = '{category}' " + \
@@ -230,7 +232,6 @@ class DataManagement:
 
         # commit
         self.end_connection(con)
-
 
     def add_category(self, category):
 
@@ -304,4 +305,48 @@ class DataManagement:
         # commit
         self.end_connection(con)
 
+    def export_all(self) -> dict | None:
+        """ Export all db values from all tables sorted by category """
 
+        export_data = {}
+
+        # get categories
+        categories = self.get_categories()
+        if not categories:
+            return None
+
+        # connect
+        con, cur = self.start_connection()
+
+        try:
+            # get all values by category
+            for category in categories:
+                export_data[category] = self.get_entries_by_category(category, full_date=True)
+
+        except Exception as del_err:
+            loghandler.write_log(self.PATH_LOGFILE, 'Export all ERROR: %s' % str(del_err))
+
+        # commit
+        self.end_connection(con)
+
+        return export_data
+
+    def import_all(self, data: dict):
+
+        # connect
+        con, cur = self.start_connection()
+
+        try:
+            # get all values by category
+            for category in data.keys():
+                self.add_category(category)
+
+
+                for entry in data[category]:
+                    self.add_element(entry[2], entry[1], entry[3], entry[0])
+
+        except Exception as del_err:
+            loghandler.write_log(self.PATH_LOGFILE, 'Export all ERROR: %s' % str(del_err))
+
+        # commit
+        self.end_connection(con)

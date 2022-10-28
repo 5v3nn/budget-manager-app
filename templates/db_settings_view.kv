@@ -113,4 +113,14 @@
                 MDRectangleFlatButton:
                     text: 'Export'
                     size_hint: (.6, 1)
-                    on_release: print('todo')
+                    on_release: root.export_file_manager_open()
+
+            EntryField:
+                EntryFieldLabel:
+                    text: 'Import Database:'
+                    size_hint: (.4, 1)
+
+                MDRectangleFlatButton:
+                    text: 'Import'
+                    size_hint: (.6, 1)
+                    on_release: root.import_file_manager_open()

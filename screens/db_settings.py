@@ -1,10 +1,15 @@
+import json
+import os
+
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import SlideTransition
+from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.list import OneLineAvatarIconListItem, BaseListItem
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.snackbar import Snackbar
@@ -35,6 +40,12 @@ class DBSettingsView(MDScreen):
     month_delete_dialog_alert = None
     _month_items_to_delete = []
 
+    # export db
+    export_file_manager = None
+    export_manager_open = False
+    import_file_manager = None
+    import_manager_open = False
+
 
     def __init__(self, **kwargs):
         super(DBSettingsView, self).__init__(**kwargs)
@@ -47,6 +58,9 @@ class DBSettingsView(MDScreen):
 
         # init dialogs
         self.init_category_management_dialogs()
+
+        # init export file manager
+        self.init_export_import_file_manager()
 
     def on_back_button(self):
         """
@@ -172,7 +186,6 @@ class DBSettingsView(MDScreen):
                 ),
             ],
         )
-
 
     # region create_category
     def on_create_category_button(self):
@@ -425,6 +438,134 @@ class DBSettingsView(MDScreen):
 
         # close dialog
         self.month_delete_alert_dialog_on_close()
+    # endregion
+
+    # region export_import_db
+
+    def init_export_import_file_manager(self):
+
+        # export file manager
+        self.export_manager_open = False
+        self.export_file_manager = MDFileManager(
+            exit_manager=self.export_exit_manager,
+            select_path=self.export_select_path
+        )
+
+        # import file manager
+        self.import_manager_open = False
+        self.import_file_manager = MDFileManager(
+            exit_manager=self.import_exit_manager,
+            select_path=self.import_select_path
+        )
+
+    def export_file_manager_open(self):
+
+        if not self.export_file_manager:
+            self.init_export_import_file_manager()
+
+        self.export_file_manager.show(os.path.expanduser("~"))
+        self.export_manager_open = True
+
+    def export_select_path(self, path: str):
+        """ It will be called when you click on the file name
+        or the catalog selection button.
+
+        :param path: path to the selected directory or file;
+        """
+
+        # print(path, toast(path))
+        path = self.export_db_data(path)
+
+        self.export_exit_manager()
+        toast(f"Exported to '{path}'")
+
+    def export_db_data(self, path: str):
+        """ Export the db data into a json file """
+
+        # todo error handling
+
+        # make sure it's a folder not a file
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+            self.export_db_data(path)
+            return path
+
+        # get data
+        data = DataManagement().export_all()
+
+        # add file name
+        path = os.path.join(path, 'db.json')
+
+        # dump data to file
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, fp=f, indent=4)
+
+        return path
+
+    def export_exit_manager(self, *args):
+        """ Called when the user reaches the root of the directory tree """
+
+        self.export_manager_open = False
+        self.export_file_manager.close()
+
+    def import_file_manager_open(self):
+
+        if not self.import_file_manager:
+            self.init_export_import_file_manager()
+
+        self.import_file_manager.show(os.path.expanduser("~"))
+        self.import_manager_open = True
+
+    def import_select_path(self, path: str):
+        """ It will be called when you click on the file name
+        or the catalog selection button.
+
+        :param path: path to the selected directory or file;
+        """
+
+        # print(path, toast(path))
+        success = self.import_db_data(path)
+
+        self.import_exit_manager()
+        if not success:
+            toast('Error on import')
+        else:
+            toast('Imported data')
+
+    def import_db_data(self, path: str) -> bool:
+        """ Export the db data into a json file """
+
+        # make sure it's a folder not a file
+        if not os.path.isfile(path):
+            loghandler.write_log(self.LOG_FILE, f"IMPORT ERROR: NO FILE SELECTED: '{path}';")
+            return False
+
+        # get data
+        data = {}
+        try:
+            with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                data = json.load(fp=f)
+        except Exception as read_dict_err:
+            err_msg = f"IMPORT JSON READ FILE ERROR: {str(read_dict_err)}"
+            loghandler.write_log(self.LOG_FILE, err_msg, print_log=True)
+            return False
+
+        # import data
+        if data:
+            DataManagement().import_all(data)
+        else:
+            loghandler.write_log(self.LOG_FILE, f"IMPORT ERROR: Read file error, either no content or ")
+            return False
+
+        loghandler.write_log(self.LOG_FILE, f"IMPORTED DATA from file: '{path}'", print_log=True)
+        return True
+
+    def import_exit_manager(self, *args):
+        """ Called when the user reaches the root of the directory tree """
+
+        self.import_manager_open = False
+        self.import_file_manager.close()
+
     # endregion
 
 

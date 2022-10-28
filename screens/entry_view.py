@@ -215,64 +215,6 @@ class EntryView(MDScreen):
         # refresh data table
         self.show_data_table(self.ids[self.select_display_month_caller_id].text)
 
-
-
-
-
-        """
-        def get_float(string):
-            try:
-                return float(string)
-            except:
-                return 0.0
-
-        # get widget where the data table should be added
-        parent = self.ids[self.parent_id]
-
-        # set columns
-        column_data = [
-            ("Date", dp(20)),
-            ("Item", dp(30)),
-            ("Category", dp(17)),
-            ("Cost", dp(15)),
-        ]
-
-        # get row data and add total costs
-        row_data = data_management.DataManagement().get_entries_by_date(display_month)
-        row_data = row_data + [
-            ["", "", "Total:", str(sum([get_float(d[3]) for d in row_data])), '']
-        ]
-
-        # create data table widget
-        data_table = MDDataTable(
-            check=True,
-            # anchor_y='center',
-            use_pagination=False,
-            column_data=column_data,
-            row_data=row_data,
-            sorted_on="Date",
-            sorted_order="ASC",
-            # elevation=20,
-            rows_num=len(row_data),
-        )
-        data_table.bind(on_row_press=self.on_entry_press)
-
-        # PARENT: remove existing child(ren) of parent widget -> 'update' table.
-        # print(f'parent children: {parent.children}')
-        if parent.children:
-            for child in parent.children:
-                parent.remove_widget(child)
-
-        # add data table
-        parent.add_widget(data_table)
-
-        # logging
-        loghandler.write_log(
-            LOG_FILE_ENTRY_VIEW,
-            f"Created DataTable; added to widget with id '{self.parent_id}'; column_data={column_data}; row_data={row_data};"
-        )
-        """
-
     def create_menu_select_display_month(self):
         """
         Create menu dropdown to display the selection of available months to display in the data table.

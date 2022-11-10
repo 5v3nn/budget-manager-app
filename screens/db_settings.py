@@ -14,10 +14,12 @@ from kivymd.uix.list import OneLineAvatarIconListItem, BaseListItem
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.snackbar import Snackbar
 # from screens.entry_add_view import TextInputMaxLength
+from kivymd.app import MDApp
+from kivy.utils import platform
+
 from save_system import SaveSystem
 from data_management import DataManagement
-from kivymd.app import MDApp
-
+from assets.utilities.permission_manager import PermissionManager
 import loghandler
 
 
@@ -458,12 +460,15 @@ class DBSettingsView(MDScreen):
             select_path=self.import_select_path
         )
 
+
+
+
     def export_file_manager_open(self):
 
         if not self.export_file_manager:
             self.init_export_import_file_manager()
 
-        self.export_file_manager.show(os.path.expanduser("~"))
+        self.export_file_manager.show(os.path.expanduser(PermissionManager().get_default_external_storage()))
         self.export_manager_open = True
 
     def export_select_path(self, path: str):
@@ -513,7 +518,7 @@ class DBSettingsView(MDScreen):
         if not self.import_file_manager:
             self.init_export_import_file_manager()
 
-        self.import_file_manager.show(os.path.expanduser("~"))
+        self.import_file_manager.show(os.path.expanduser(PermissionManager().get_default_external_storage()))
         self.import_manager_open = True
 
     def import_select_path(self, path: str):

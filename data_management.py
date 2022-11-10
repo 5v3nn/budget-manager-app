@@ -305,7 +305,7 @@ class DataManagement:
         # commit
         self.end_connection(con)
 
-    def export_all(self) -> dict | None:
+    def export_all(self):
         """ Export all db values from all tables sorted by category """
 
         export_data = {}

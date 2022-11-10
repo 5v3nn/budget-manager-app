@@ -6,6 +6,7 @@ from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.config import Config
 from kivy.core.window import Window
+from kivy.utils import platform
 from screens import settings
 from save_system import SaveSystem
 
@@ -13,13 +14,14 @@ from save_system import SaveSystem
 KIVY_FILE_SCREEN_MANAGER = './templates/screen_manager.kv'
 
 # set version
-__version__ = "0.1.0.1"  # change in the buildozer.spec too
+__version__ = "0.1.0.2"  # change in the buildozer.spec too
 
 # Set screen size (didn't work)
 # Config.set('graphics', 'resizable', 1)
 # Config.set('graphics', 'width', 1080)
 # Config.set('graphics', 'height', 2160)
-Window.size = (1080 * .4, 2160 * .4)  # todo comment this out for build
+if platform in ('linux', 'win', 'macosx'):
+    Window.size = (1080 * .4, 2160 * .4)
 
 
 class BudgetManagerApp(MDApp):

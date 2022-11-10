@@ -16,6 +16,16 @@ which will affect the category dropdown in the add new entry screen.
 Keep in mind by deleting a category, it will delete the entries with that category as well. 
 
 
+## Intended to Run
+
+- For testing out the app, see the `bin/` folder for the current build of the app. 
+- For developing, see:
+  - [External Documentation](External Documentation)
+  - [Installation of Resources](Installation of Resources) 
+  - [Project Structure](Project Structure)
+
+
+
 ## Current State of Project
 
 **Work in Progress**
@@ -44,6 +54,7 @@ None at the moment.
 [SQLite](https://www.sqlitetutorial.net/)
 
 
+
 ## Installation of Resources
 
 To install resources to develop or clone the project. 
@@ -56,6 +67,7 @@ Consult [this documentation](https://www.askpython.com/python/examples/write-and
 pip install kivy
 pip install kivymd
 ```
+
 
 ### Buildozer
 ```commandline
@@ -74,13 +86,22 @@ Init Buildozer
 buidozer init
 ```
 
+
+## Project Structure
+
+- `main.py`: Heart of project
+- `screens/`: Folder with python files for functionalities on screen level
+- `templates/`: Folder with kivy language files for structural functionality on screen level
+- `assets/`: Folder with supporting scripts and assets
+
+
+
 ## Build Application
 ```commandline
 buildozer -v android debug
 ```
 
 You should have an APK file in the `./bin/` directory. 
-
 
 
 

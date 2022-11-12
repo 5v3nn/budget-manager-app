@@ -1,5 +1,86 @@
-
 #: import EntryView screens.entry_view
+#: import SelectableRecycleBoxLayout screens.entry_view
+#: import RecycleDataRow screens.entry_view
+#: import RVDataTable screens.entry_view
+#: import EntryEditDialog screens.entry_view
+#: import RVEntryEditButton screens.entry_view
+
+<RVEntryLabel@MDLabel>:
+    markup: True
+    shorten: True
+    valign: 'center'
+    font_style: 'Body1'
+
+
+<EntryEditDialog>:
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: [10, 10, 10, 10]
+        spacing: 10
+        adaptive_height: True
+
+        MDLabel:
+            id: test
+            text: 'test'
+
+
+<RecycleDataRow>:
+    label_date_text: '[b]Date[/b]'
+    label_item_text: '[b]Item[/b]'
+    label_category_text: '[b]Category[/b]'
+    label_cost_text: '[b]Cost[/b]'
+    label_delete_text: '[b]Delete[/b]'
+    label_delete_rowid: -1
+    root_obj: None
+
+    table_widths: [(1.5 / 12, 1), (4 / 12, 1), (3 / 12, 1), (1.8 / 12, 1), (1.7 / 12, 1)]
+
+    MDBoxLayout:
+        orientation: 'horizontal'
+        adaptive_height: True
+        spacing: 10
+
+        RVEntryLabel:
+            id: id_label_1
+            text: root.label_date_text
+            size_hint: root.table_widths[0]
+        RVEntryLabel:
+            id: id_label_2
+            text: root.label_item_text
+            size_hint: root.table_widths[1]
+        RVEntryLabel:
+            id: id_label_3
+            text: root.label_category_text
+            size_hint: root.table_widths[2]
+        RVEntryLabel:
+            id: id_label_4
+            text: root.label_cost_text
+            size_hint: root.table_widths[3]
+            halign: 'right'
+        RVEntryEditButton:
+            id: id_label_5
+            text: root.label_delete_text
+            rowid: root.label_delete_rowid
+            size_hint: root.table_widths[4]
+            pos_hint: {"center_x": .5, "center_y": .5}
+            disabled: False if self.text =='edit' else True
+            theme_icon_color: 'Custom'
+            icon_color: app.theme_cls.accent_color if not self.disabled else (0, 0, 0, 0)
+            on_release:
+                #root.open_entry_edit_dialog(root, self.text)
+                root.delete_row(self.rowid)
+                root.root_obj.show_data_table(root.root_obj.default_display_month)
+
+
+<RVDataTable>:
+    viewclass: 'RecycleDataRow'
+
+    SelectableRecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
 
 
 <EntryView>:
@@ -8,6 +89,8 @@
 
     # assign the id of the widget where to add the data table
     parent_id: 'parent_layout'
+    #table_widths: [(1.5 / 12, 1), (4 / 12, 1), (3 / 12, 1), (1.8 / 12, 1), (1.7 / 12, 1)]
+    #table_header_names: ["[b]Date[/b]","[b]Item[/b]","[b]Category[/b]","[b]Cost[/b]","[b]Delete[/b]",]
 
     # assign the default month to display
     default_display_month: root.get_default_display_month()
@@ -37,25 +120,35 @@
                 adaptive_height: True
                 padding: [10, 10, 10, 10]
                 spacing: 10
+                size: (self.width, dp(56))
 
                 MDLabel:
                     text: '[b]Select Month:[/b]'
-                    font_size: '24px'
+                    #font_size: '24px'
+                    font_style: "H4"
+                    #size_hint_x: .6
+                    width: root.width
                     valign: 'center'
-                    size_hint: (.5, 1)
+                    halign: 'left'
                     markup: True
 
                 MDRectangleFlatButton:
                     id: dropdown_select_month_button
                     text: root.default_display_month
-                    size_hint: (.5, 1)
+                    #size_hint: (.5, 1)
+                    text_size_hint: self.width, self.height
                     on_release:
                         root.menu_select_display_month.open()
                         #root.show_data_table(root.default_display_month)
 
-            # add data table in this widget
-            MDAnchorLayout:
+            RVDataTable:
                 id: parent_layout
+
+    MDAnchorLayout:
+        anchor_y: 'center'
+        id: error_parent
+
+
 
     MDBottomAppBar:
         MDTopAppBar:
@@ -69,3 +162,4 @@
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'entry_add_view'
             left_action_items: [["menu", lambda x: root.open_settings_view()],["database-settings", lambda x: root.open_dbsettings_view()]]
+

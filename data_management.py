@@ -116,6 +116,62 @@ class DataManagement:
         # commit
         self.end_connection(con)
 
+    def get_entries_by_date_new(self, date_yyyymm):
+        """
+        Get entries by date
+
+        :param date_yyyymm: date with format YYYY-MM
+        :return: list with entries, [] on error
+        """
+
+        # calculate start year/month and end year/month
+        try:
+            start_y, start_m = [int(d) for d in date_yyyymm.split('-')]
+            # end_m = (start_m + 1) % 12
+            # end_y = start_y if start_m < end_m else (start_y + 1)
+            end_m = (
+                12
+                if start_m + 1 == 0
+                else 1
+                if start_m + 1 == 13
+                else start_m + 1
+            )
+            end_y = start_y + 1 if start_m + 1 == 13 else start_y
+
+        except Exception as date_err:
+            err_msg = f"GET ENTRY BY DATE FORMAT ERROR: {str(date_err)}"
+            loghandler.write_log(self.PATH_LOGFILE, err_msg)
+            print(err_msg)
+            return []
+
+        con, cur = self.start_connection()
+
+        # "SELECT substr(e.date, 9), e.name, c.category, e.value, substr(e.ROWID, 0) "
+        sql_statement = "SELECT substr(e.date, 9), e.name, c.category, substr(e.value), e.ROWID " + \
+                        "FROM category as c " + \
+                        "JOIN entry as e " + \
+                        "ON e.category_id = c.ROWID " + \
+                        "WHERE julianday('" + str(start_y).zfill(4) + "-" + str(start_m).zfill(2) + "-01') " + \
+                        "<= julianday(e.date) " + \
+                        "AND julianday(e.date) < julianday('" + str(end_y).zfill(4) + "-" + str(end_m).zfill(
+            2) + "-01') " + \
+                        "ORDER BY e.date ASC"
+        print(sql_statement)
+
+        try:
+            cur.execute(sql_statement)
+            # [['category', 'item', '-100.00', '2022-01-01', 0], [...]]
+            entries = cur.fetchall()
+
+        except Exception as get_entry_by_date_err:
+            loghandler.write_log(self.PATH_LOGFILE, 'SQL GET ENTRY BY DATE ERROR: ' + str(get_entry_by_date_err),
+                                 print_log=True)
+            entries = []
+
+        self.end_connection(con)
+
+        return entries
+
     def get_entries_by_date(self, date_yyyymm):
         """
         Get entries by date

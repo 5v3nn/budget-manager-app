@@ -461,8 +461,6 @@ class DBSettingsView(MDScreen):
         )
 
 
-
-
     def export_file_manager_open(self):
 
         if not self.export_file_manager:

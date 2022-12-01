@@ -2,7 +2,13 @@
 This script handles the entry view where the entries are displayed.
 """
 # import kivy modules
-from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty, ObjectProperty
+from kivy.properties import (
+    StringProperty,
+    ListProperty,
+    BooleanProperty,
+    NumericProperty,
+    ObjectProperty,
+)
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview import RecycleView
@@ -77,8 +83,7 @@ class EntryView(MDScreen):
                 print("debug: remove child: %s" % child)
                 parent_widget.remove_widget(child)
 
-    def show_data_table(self, display_month=''):
-
+    def show_data_table(self, display_month=""):
         def get_float(string):
             try:
                 return float(string)
@@ -98,7 +103,7 @@ class EntryView(MDScreen):
 
         # check if display_month has right format
         try:
-            self.clear_parent_children(self.ids['error_parent'])
+            self.clear_parent_children(self.ids["error_parent"])
 
             if not re.match(r".{4}-.{2}", display_month):
                 raise Exception(f"Invalid format for display_month = '{display_month}'")
@@ -109,7 +114,7 @@ class EntryView(MDScreen):
             print(err_msg)
 
             # add error widget
-            self.ids['error_parent'].add_widget(
+            self.ids["error_parent"].add_widget(
                 MDLabel(
                     text=f"Could not retrieve entries from database.\n"
                     f"You may have to add a new entry or select a month to display entries."
@@ -211,16 +216,6 @@ class EntryView(MDScreen):
         self.default_display_month = month  # assign value to this variable, so the next time the screen changes it won't get reset.
         self.show_data_table(month)  # show/update the data table
 
-    def open_settings_view(self):
-        self.manager.transition = NoTransition()
-        self.manager.current = "settings_view"
-        self.manager.transition = SlideTransition()
-
-    def open_dbsettings_view(self):
-        self.manager.transition = NoTransition()
-        self.manager.current = "dbsettings_view"
-        self.manager.transition = SlideTransition()
-
 
 class EntryLabel(MDLabel):
     def __init__(self, text, size_hint, **kwargs):
@@ -240,19 +235,16 @@ class EntryEditDialog(MDBoxLayout):
     pass
 
 
-
-class SelectableRecycleBoxLayout(
-    FocusBehavior, RecycleBoxLayout
-):
+class SelectableRecycleBoxLayout(FocusBehavior, RecycleBoxLayout):
     """Adds selection and focus behaviour to the view."""
 
     multiselect = False
     touch_multiselect = False
 
+
 class RecycleDataRow(RecycleDataViewBehavior, GridLayout):
     # app = None
     # theme_class = None
-
 
     index = None
     selected = BooleanProperty(False)
@@ -260,7 +252,6 @@ class RecycleDataRow(RecycleDataViewBehavior, GridLayout):
     cols = 5
 
     entry_dialog = None
-
 
     # def __init__(self, **kwargs):
     #     super(RecycleDataRow, self).__init__(**kwargs)
@@ -297,11 +288,10 @@ class RecycleDataRow(RecycleDataViewBehavior, GridLayout):
         self.label_category_text = data["label_category"]["text"]
         self.label_cost_text = data["label_cost"]["text"]
         self.label_delete_text = data["label_delete"]["text"]
-        if 'rowid' in data["label_delete"]:
+        if "rowid" in data["label_delete"]:
             self.label_delete_rowid = data["label_delete"]["rowid"]
-        if 'root_obj' in data["label_delete"]:
+        if "root_obj" in data["label_delete"]:
             self.root_obj = data["label_delete"]["root_obj"]
-
 
         return super(RecycleDataRow, self).refresh_view_attrs(rv, index, data)
 
@@ -314,8 +304,6 @@ class RecycleDataRow(RecycleDataViewBehavior, GridLayout):
 
         # delete entry
         data_management.DataManagement().delete_entry(rowid)
-
-
 
     # def open_entry_edit_dialog(self, root, rowid):
     #     print(f'Opening entry edit dialog for id {rowid}')
@@ -367,18 +355,23 @@ class RVDataTable(RecycleView):
 
                 if row_i[0] == 4:
                     try:
-                        d[label_i] = {"text": "edit", "rowid": int(row_i[1]), "root_obj": self.root_obj}
+                        d[label_i] = {
+                            "text": "edit",
+                            "rowid": int(row_i[1]),
+                            "root_obj": self.root_obj,
+                        }
                     except:
                         d[label_i] = {"text": str(row_i[1])}
 
             # print('d: ', d)
             self.data.append(d)
 
+
 class RVEntryEditButton(MDIconButton):
     rowid = NumericProperty()
     show_entries_func = None
 
-    icon = 'delete'
+    icon = "delete"
     # icon_size = 16
     disabled_color = (255, 255, 255, 0)
     line_width = 1

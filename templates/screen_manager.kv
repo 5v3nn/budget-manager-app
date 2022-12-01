@@ -6,6 +6,7 @@
 #: include ./templates/db_settings_view.kv
 
 
+
 MDScreenManager:
     id: screen_manager
 
@@ -22,9 +23,11 @@ MDScreenManager:
         manager: screen_manager
 
     DBSettingsView:
-        id: db_settings_view
+        id: db_settings_view  # name: dbsettings_view
         manager: screen_manager
 
     SettingsView:
         id: settings_view
         manager: screen_manager
+
+
